@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>G.L.I.T.C.H. - System Interface</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #050303;
+      --panel-bg: rgba(15, 0, 3, 0.9);
+      --sidebar-bg: rgba(15, 0, 3, 0.97);
+      --accent-color: #ff0033;
+      --accent-glow: rgba(255, 0, 51, 0.5);
+      --accent-dim: rgba(255, 0, 51, 0.2);
+      --text-secondary: #ff8099;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--accent-color);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Falling Digital Rain Canvas Background */
+    #matrix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    aside, .backdrop, .modal-backdrop, .main-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Overlay Sidebar Drawer */
+    aside {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      height: 100%;
+      background: var(--sidebar-bg);
+      border-right: 2px solid var(--accent-color);
+      box-shadow: 5px 0 20px var(--accent-glow);
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      transition: left 0.3s ease-in-out;
+      z-index: 300;
+    }
+
+    aside.open {
+      left: 0;
+    }
+
+    .backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      z-index: 250;
+    }
+
+    .backdrop.active {
+      display: block;
+    }
+
+    .new-quest-btn {
+      background-color: var(--accent-dim);
+      color: #ffffff;
+      border: 1px solid var(--accent-color);
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      box-shadow: 0 0 5px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .new-quest-btn:hover {
+      background-color: var(--accent-color);
+      color: var(--bg-color);
+    }
+
+    .history-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    #history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 4px;
+      margin-bottom: 10px;
+    }
+
+    .history-item {
+      background: rgba(10, 0, 2, 0.8);
+      border: 1px dashed var(--accent-dim);
+      color: var(--text-secondary);
+      padding: 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 2px;
+      user-select: none;
+    }
+
+    .history-item.active {
+      border-color: var(--accent-color);
+      color: #ffffff;
+      background: var(--accent-dim);
+    }
+
+    .sidebar-footer {
+      border-top: 1px dashed var(--accent-dim);
+      padding-top: 10px;
+      margin-top: auto;
+    }
+
+    .sidebar-settings-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 10px;
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sidebar-settings-btn:hover {
+      background: var(--accent-color);
+      color: var(--bg-color);
+    }
+
+    /* Main App Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      min-height: 0;
+    }
+
+    /* Header */
+    header {
+      background: var(--panel-bg);
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px var(--accent-glow);
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .icon-btn:hover {
+      background: var(--accent-color);
+      color: var(--bg-color);
+    }
+
+    header h1 {
+      color: var(--accent-color);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    header .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    /* Chat Area Scrollable */
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 4px;
+      background: transparent;
+      border: none;
+      margin-bottom: 8px;
+      min-height: 0;
+    }
+
+    .message {
+      padding: 8px 12px;
+      border-radius: 2px;
+      max-width: 85%;
+      word-break: break-word;
+      white-space: pre-wrap;
+      font-size: 0.85rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background-color: rgba(255, 0, 51, 0.25);
+      border: 1px solid var(--accent-color);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .message.model {
+      align-self: flex-start;
+      background-color: rgba(15, 0, 3, 0.85);
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .message img, .message video {
+      max-width: 100%;
+      border-radius: 2px;
+      margin-top: 6px;
+      border: 1px solid var(--accent-color);
+    }
+
+    /* Media Preview Area */
+    #media-preview-container {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-bg);
+      border: 1px solid var(--accent-color);
+      padding: 4px 8px;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    #media-preview-container.active {
+      display: flex;
+    }
+
+    /* Input Container Fixed at Bottom */
+    #input-container {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+      align-items: center;
+      background: transparent;
+      padding: 0 0 8px 0;
+      border: none;
+      width: 100%;
+    }
+
+    #user-input {
+      flex: 1;
+      min-width: 0;
+      background-color: var(--panel-bg);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      padding: 8px 6px;
+      font-size: 0.8rem;
+      outline: none;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    button {
+      background-color: var(--panel-bg);
+      color: var(--accent-color);
+      border: 1px solid var(--accent-color);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      font-weight: bold;
+      padding: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      box-shadow: 0 0 10px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    button:hover {
+      background-color: var(--accent-color);
+      color: var(--bg-color);
+    }
+
+    /* SVG Icon Styling */
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      display: block;
+    }
+
+    button:hover .btn-icon {
+      fill: var(--bg-color);
+    }
+
+    #mic-btn.recording {
+      background-color: var(--accent-color);
+      color: var(--bg-color);
+      animation: pulse-rec 1s infinite alternate;
+    }
+    #mic-btn.recording .btn-icon {
+      fill: var(--bg-color);
+    }
+
+    @keyframes pulse-rec {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    /* Modals & Popups */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 500;
+      padding: 15px;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--sidebar-bg);
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 25px var(--accent-glow);
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--accent-color);
+      padding-bottom: 8px;
+    }
+
+    .modal-header h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-color);
+    }
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .setting-group label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+    }
+
+    .setting-group input[type="password"],
+    .setting-group input[type="text"] {
+      background: var(--panel-bg);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 10px;
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .palette-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .palette-row input[type="color"] {
+      -webkit-appearance: none;
+      border: 1px solid var(--accent-color);
+      width: 45px;
+      height: 35px;
+      background: var(--panel-bg);
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .palette-row input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .palette-row input[type="color"]::-webkit-color-swatch {
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Falling Matrix Rain Background -->
+  <canvas id="matrix-canvas"></canvas>
+
+  <!-- Backdrop for Sidebar Drawer -->
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- Settings Modal Popup -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>[SYSTEM SETTINGS]</h2>
+        <button class="icon-btn" id="close-settings-btn">×</button>
+      </div>
+
+      <div class="setting-group">
+        <label for="api-key-input">Gemini API Key</label>
+        <input type="password" id="api-key-input" placeholder="Paste your API key here..." />
+      </div>
+
+      <div class="setting-group">
+        <label for="accent-picker">Primary Accent Color</label>
+        <div class="palette-row">
+          <input type="color" id="accent-picker" value="#ff0033">
+          <span id="accent-hex" style="font-size: 0.8rem; color: var(--text-secondary);">#ff0033</span>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label for="secondary-picker">Secondary / Text Accent Color</label>
+        <div class="palette-row">
+          <input type="color" id="secondary-picker" value="#ff8099">
+          <span id="secondary-hex" style="font-size: 0.8rem; color: var(--text-secondary);">#ff8099</span>
+        </div>
+      </div>
+
+      <button id="save-settings-btn" style="width: 100%; margin-top: 5px; padding: 12px;">SAVE CONFIG</button>
+    </div>
+  </div>
+
+  <!-- Custom Quest Options Modal -->
+  <div class="modal-backdrop" id="action-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="action-modal-title">[QUEST OPTIONS]</h2>
+        <button class="icon-btn" id="close-action-btn">×</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">Select command for this log entry:</p>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+        <button id="modal-rename-btn" style="width: 100%; padding: 12px; justify-content: center;">RENAME QUEST</button>
+        <button id="modal-delete-btn" style="width: 100%; padding: 12px; justify-content: center; background: rgba(255,0,51,0.3); color: #fff;">DELETE QUEST</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Quest Text Input Modal -->
+  <div class="modal-backdrop" id="rename-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>[RENAME QUEST]</h2>
+        <button class="icon-btn" id="close-rename-btn">×</button>
+      </div>
+      <div class="setting-group">
+        <label for="rename-input">New Quest Title</label>
+        <input type="text" id="rename-input" placeholder="Enter title..." />
+      </div>
+      <button id="save-rename-btn" style="width: 100%; margin-top: 5px; padding: 12px; justify-content: center;">UPDATE TITLE</button>
+    </div>
+  </div>
+
+  <!-- Side Menu Bar Drawer -->
+  <aside id="sidebar">
+    <button class="new-quest-btn" id="new-quest-btn">[ + ] New Quest</button>
+    <div class="history-label">Quest Logs (Hold to Manage)</div>
+    <div id="history-list"></div>
+    <div class="sidebar-footer">
+      <button class="sidebar-settings-btn" id="settings-toggle-btn">⚙ Settings</button>
+    </div>
+  </aside>
+
+  <!-- Main Chat Section -->
+  <div class="main-content">
+    <header>
+      <div class="header-left">
+        <button class="icon-btn" id="menu-toggle-btn">☰</button>
+        <div>
+          <h1>[SYSTEM: G.L.I.T.C.H.]</h1>
+          <p class="subtitle">Gamer Linked Intelligent Tactical Control Host</p>
+        </div>
+      </div>
+    </header>
+
+    <div id="chat-container">
+      <div class="message model">[Notice] System connection active. Ready for command.</div>
+    </div>
+
+    <!-- Media Preview Area -->
+    <div id="media-preview-container">
+      <span id="media-file-name">Attached file ready</span>
+      <button type="button" id="clear-media-btn" style="padding: 2px 6px; font-size: 0.7rem;">×</button>
+    </div>
+
+    <form id="input-container">
+      <input type="file" id="media-input" accept="image/*,video/*" style="display: none;" />
+      <button type="button" id="attach-btn" title="Attach Photo or Video">+</button>
+      <input type="text" id="user-input" placeholder="Execute command..." required />
+      
+      <!-- Microphone Icon SVG -->
+      <button type="button" id="mic-btn" title="Voice Input">
+        <svg class="btn-icon" viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </button>
+
+      <!-- Paper Airplane/Arrow Icon SVG for Send -->
+      <button type="submit" id="send-btn" title="Send Command">
+        <svg class="btn-icon" viewBox="0 0 24 24">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const chars = '0123456789';
+    const fontSize = 13;
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = [];
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.floor(Math.random() * canvas.height);
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(5, 3, 3, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const computedAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#ff0033';
+      ctx.fillStyle = computedAccent;
+      ctx.font = 'bold ' + fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.94) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 40);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatContainer = document.getElementById('chat-container');
+      const userInput = document.getElementById('user-input');
+      const mediaInput = document.getElementById('media-input');
+      const micBtn = document.getElementById('mic-btn');
+      const historyList = document.getElementById('history-list');
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('backdrop');
+      const settingsModal = document.getElementById('settings-modal');
+      const actionModal = document.getElementById('action-modal');
+      const renameModal = document.getElementById('rename-modal');
+      const apiKeyInput = document.getElementById('api-key-input');
+      const renameInput = document.getElementById('rename-input');
+      const accentPicker = document.getElementById('accent-picker');
+      const secondaryPicker = document.getElementById('secondary-picker');
+      const accentHex = document.getElementById('accent-hex');
+      const secondaryHex = document.getElementById('secondary-hex');
+      const mediaPreviewContainer = document.getElementById('media-preview-container');
+      const mediaFileName = document.getElementById('media-file-name');
+      
+      const menuToggleBtn = document.getElementById('menu-toggle-btn');
+      const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+      const closeSettingsBtn = document.getElementById('close-settings-btn');
+      const saveSettingsBtn = document.getElementById('save-settings-btn');
+      const closeActionBtn = document.getElementById('close-action-btn');
+      const modalRenameBtn = document.getElementById('modal-rename-btn');
+      const modalDeleteBtn = document.getElementById('modal-delete-btn');
+      const closeRenameBtn = document.getElementById('close-rename-btn');
+      const saveRenameBtn = document.getElementById('save-rename-btn');
+      const newQuestBtn = document.getElementById('new-quest-btn');
+      const attachBtn = document.getElementById('attach-btn');
+      const clearMediaBtn = document.getElementById('clear-media-btn');
+      const inputForm = document.getElementById('input-container');
+
+      let sessions = JSON.parse(localStorage.getItem('glitch_sessions')) || [];
+      let currentSessionId = localStorage.getItem('glitch_current_session') || null;
+      let activeQuestId = null;
+      let contentsHistory = [];
+      let attachedFilePayload = null;
+      let apiKey = localStorage.getItem('glitch_api_key') || '';
+      let currentAccent = localStorage.getItem('glitch_accent') || '#ff0033';
+      let currentSecondary = localStorage.getItem('glitch_secondary') || '#ff8099';
+
+      function initApp() {
+        applyTheme(currentAccent, currentSecondary);
+        apiKeyInput.value = apiKey;
+        accentPicker.value = currentAccent;
+        secondaryPicker.value = currentSecondary;
+        accentHex.textContent = currentAccent;
+        secondaryHex.textContent = currentSecondary;
+
+        if (!apiKey) {
+          settingsModal.classList.add('active');
+        }
+
+        if (sessions.length === 0) {
+          startNewQuest();
+        } else {
+          if (!currentSessionId || !sessions.find(s => s.id === currentSessionId)) {
+            currentSessionId = sessions[0].id;
+          }
+          loadSession(currentSessionId);
+        }
+        renderHistoryList();
+      }
+
+      function toggleSettingsModal() {
+        settingsModal.classList.toggle('active');
+        if (sidebar.classList.contains('open')) toggleSidebar();
+      }
+
+      function toggleActionModal(id = null) {
+        if (id) {
+          activeQuestId = id;
+          actionModal.classList.add('active');
+        } else {
+          activeQuestId = null;
+          actionModal.classList.remove('active');
+        }
+      }
+
+      function toggleRenameModal(id = null) {
+        actionModal.classList.remove('active');
+        if (id) {
+          activeQuestId = id;
+          const session = sessions.find(s => s.id === id);
+          if (session) {
+            renameInput.value = session.title;
+          }
+          renameModal.classList.add('active');
+        } else {
+          renameModal.classList.remove('active');
+        }
+      }
+
+      function saveRenamedQuest() {
+        const newTitle = renameInput.value.trim();
+        if (!newTitle || !activeQuestId) return;
+        const session = sessions.find(s => s.id === activeQuestId);
+        if (session) {
+          session.title = newTitle;
+          saveAndRefresh();
+        }
+        toggleRenameModal();
+      }
+
+      function applyTheme(accent, secondary) {
+        currentAccent = accent;
+        currentSecondary = secondary;
+        document.documentElement.style.setProperty('--accent-color', accent);
+        document.documentElement.style.setProperty('--text-secondary', secondary);
+        document.documentElement.style.setProperty('--accent-glow', hexToRgba(accent, 0.5));
+        document.documentElement.style.setProperty('--accent-dim', hexToRgba(accent, 0.2));
+      }
+
+      function hexToRgba(hex, alpha) {
+        let c = hex.replace('#','');
+        if(c.length===3) c = c.split('').map(x => x + x).join('');
+        const num = parseInt(c, 16);
+        return `rgba(${num>>16},${(num>>8)&255},${num&255},${alpha})`;
+      }
+
+      accentPicker.addEventListener('input', (e) => {
+        const val = e.target.value;
+        accentHex.textContent = val;
+        applyTheme(val, secondaryPicker.value);
+      });
+
+      secondaryPicker.addEventListener('input', (e) => {
+        const val = e.target.value;
+        secondaryHex.textContent = val;
+        applyTheme(accentPicker.value, val);
+      });
+
+      function saveSettings() {
+        const keyVal = apiKeyInput.value.trim();
+        if (!keyVal) {
+          alert('Please enter a valid Gemini API key.');
+          return;
+        }
+        apiKey = keyVal;
+        currentAccent = accentPicker.value;
+        currentSecondary = secondaryPicker.value;
+
+        localStorage.setItem('glitch_api_key', apiKey);
+        localStorage.setItem('glitch_accent', currentAccent);
+        localStorage.setItem('glitch_secondary', currentSecondary);
+        toggleSettingsModal();
+      }
+
+      function startNewQuest() {
+        let title = "Main Quest";
+        if (sessions.length > 0) {
+          let newQuestCount = sessions.filter(s => s.title.startsWith("New Quest")).length + 1;
+          title = "New Quest " + newQuestCount;
+        }
+
+        const newSession = {
+          id: 'quest_' + Date.now(),
+          title: title,
+          history: []
+        };
+        sessions.unshift(newSession);
+        currentSessionId = newSession.id;
+        contentsHistory = [];
+        saveAndRefresh();
+        
+        chatContainer.innerHTML = '';
+        appendMessageUI('model', '[Notice] System initialized. ' + title + ' active. Ready for command.');
+        if (sidebar.classList.contains('open')) toggleSidebar();
+      }
+
+      function loadSession(id) {
+        currentSessionId = id;
+        const session = sessions.find(s => s.id === id);
+        if (session) {
+          contentsHistory = [...session.history];
+          chatContainer.innerHTML = '';
+          
+          if (contentsHistory.length === 0) {
+            appendMessageUI('model', '[Notice] System connection active. Ready for command.');
+          } else {
+            contentsHistory.forEach(item => {
+              if (item.parts) {
+                let textPart = item.parts.find(p => p.text)?.text || "";
+                let inlinePart = item.parts.find(p => p.inline_data);
+                
+                if (inlinePart) {
+                  let dataUrl = `data:${inlinePart.inline_data.mime_type};base64,${inlinePart.inline_data.data}`;
+                  appendMediaMessageUI(item.role === 'user' ? 'user' : 'model', textPart, dataUrl, inlinePart.inline_data.mime_type);
+                } else if (textPart) {
+                  appendMessageUI(item.role === 'user' ? 'user' : 'model', textPart);
+                }
+              }
+            });
+          }
+        }
+        renderHistoryList();
+        if (sidebar.classList.contains('open')) toggleSidebar();
+      }
+
+      function deleteSession(id) {
+        sessions = sessions.filter(s => s.id !== id);
+        if (currentSessionId === id) {
+          if (sessions.length > 0) {
+            loadSession(sessions[0].id);
+          } else {
+            startNewQuest();
+          }
+        } else {
+          saveAndRefresh();
+        }
+      }
+
+      function saveAndRefresh() {
+        localStorage.setItem('glitch_sessions', JSON.stringify(sessions));
+        localStorage.setItem('glitch_current_session', currentSessionId);
+        renderHistoryList();
+      }
+
+      function renderHistoryList() {
+        historyList.innerHTML = '';
+        sessions.forEach(session => {
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('history-item');
+          if (session.id === currentSessionId) itemDiv.classList.add('active');
+          
+          const titleSpan = document.createElement('span');
+          titleSpan.textContent = session.title;
+          titleSpan.style.flex = "1";
+          titleSpan.style.overflow = "hidden";
+          titleSpan.style.textOverflow = "ellipsis";
+          
+          itemDiv.appendChild(titleSpan);
+
+          itemDiv.onclick = () => loadSession(session.id);
+
+          let pressTimer = null;
+          const triggerCustomMenu = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleActionModal(session.id);
+          };
+
+          itemDiv.addEventListener('contextmenu', triggerCustomMenu);
+          itemDiv.addEventListener('touchstart', () => {
+            pressTimer = setTimeout(() => {
+              triggerCustomMenu(new Event('contextmenu'));
+            }, 600);
+          });
+          itemDiv.addEventListener('touchend', () => clearTimeout(pressTimer));
+          itemDiv.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+          historyList.appendChild(itemDiv);
+        });
+      }
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active');
+      }
+
+      function appendMessageUI(role, text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', role);
+        msgDiv.textContent = text;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function appendMediaMessageUI(role, text, dataUrl, mimeType) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', role);
+
+        if (text) {
+          const p = document.createElement('div');
+          p.textContent = text;
+          msgDiv.appendChild(p);
+        }
+
+        if (mimeType.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = dataUrl;
+          msgDiv.appendChild(img);
+        } else if (mimeType.startsWith('video/')) {
+          const vid = document.createElement('video');
+          vid.src = dataUrl;
+          vid.controls = true;
+          msgDiv.appendChild(vid);
+        }
+
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function clearMedia() {
+        attachedFilePayload = null;
+        mediaInput.value = '';
+        mediaPreviewContainer.classList.remove('active');
+      }
+
+      menuToggleBtn.addEventListener('click', toggleSidebar);
+      backdrop.addEventListener('click', toggleSidebar);
+      settingsToggleBtn.addEventListener('click', toggleSettingsModal);
+      closeSettingsBtn.addEventListener('click', toggleSettingsModal);
+      saveSettingsBtn.addEventListener('click', saveSettings);
+      
+      closeActionBtn.addEventListener('click', () => toggleActionModal());
+      modalRenameBtn.addEventListener('click', () => toggleRenameModal(activeQuestId));
+      modalDeleteBtn.addEventListener('click', () => {
+        if (activeQuestId) {
+          deleteSession(activeQuestId);
+          toggleActionModal();
+        }
+      });
+
+      closeRenameBtn.addEventListener('click', () => toggleRenameModal());
+      saveRenameBtn.addEventListener('click', saveRenamedQuest);
+      newQuestBtn.addEventListener('click', startNewQuest);
+      attachBtn.addEventListener('click', () => mediaInput.click());
+      clearMediaBtn.addEventListener('click', clearMedia);
+
+      mediaInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64String = e.target.result.split(',')[1];
+          attachedFilePayload = {
+            mimeType: file.type,
+            data: base64String,
+            dataUrl: e.target.result
+          };
+          mediaFileName.textContent = `Attached: ${file.name}`;
+          mediaPreviewContainer.classList.add('active');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      let recognition = null;
+      let isRecording = false;
+
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+          userInput.value = event.results[0][0].transcript;
+          stopRecordingUI();
+        };
+
+        recognition.onerror = () => stopRecordingUI();
+        recognition.onend = () => stopRecordingUI();
+      }
+
+      micBtn.addEventListener('click', () => {
+        if (!recognition) {
+          alert('Voice input is not supported on this browser.');
+          return;
+        }
+        if (isRecording) {
+          recognition.stop();
+        } else {
+          recognition.start();
+          micBtn.classList.add('recording');
+          isRecording = true;
+        }
+      });
+
+      function stopRecordingUI() {
+        micBtn.classList.remove('recording');
+        isRecording = false;
+      }
+
+      inputForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!apiKey) {
+          alert('Please open the menu (☰) and configure your Gemini API key in Settings first.');
+          toggleSettingsModal();
+          return;
+        }
+
+        const text = userInput.value.trim();
+        if (!text && !attachedFilePayload) return;
+
+        let parts = [];
+        if (text) {
+          parts.push({ text: text });
+        }
+
+        let currentFile = attachedFilePayload;
+        if (currentFile) {
+          parts.push({
+            inline_data: {
+              mime_type: currentFile.mimeType,
+              data: currentFile.data
+            }
+          });
+        }
+
+        if (currentFile) {
+          appendMediaMessageUI('user', text, currentFile.dataUrl, currentFile.mimeType);
+        } else {
+          appendMessageUI('user', text);
+        }
+
+        contentsHistory.push({ role: 'user', parts: parts });
+        
+        userInput.value = '';
+        clearMedia();
+
+        let currentSession = sessions.find(s => s.id === currentSessionId);
+        currentSession.history = [...contentsHistory];
+        saveAndRefresh();
+
+        const loadingDiv = document.createElement('div');
+        loadingDiv.classList.add('message', 'model');
+        loadingDiv.textContent = '[SYSTEM] Processing input & telemetry stream...';
+        chatContainer.appendChild(loadingDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: contentsHistory })
+            }
+          );
+
+          const data = await response.json();
+
+          if (loadingDiv.parentNode) chatContainer.removeChild(loadingDiv);
+
+          let replyText = "[SYSTEM ERROR] No response received from core.";
+          if (data.candidates && data.candidates[0].content?.parts[0]?.text) {
+            replyText = data.candidates[0].content.parts[0].text;
+          } else if (data.error) {
+            replyText = "[ERROR] " + data.error.message;
+          }
+
+          appendMessageUI('model', replyText);
+          contentsHistory.push({ role: 'model', parts: [{ text: replyText }] });
+          currentSession.history = [...contentsHistory];
+          saveAndRefresh();
+
+        } catch (err) {
+          if (loadingDiv.parentNode) chatContainer.removeChild(loadingDiv);
+          appendMessageUI('model', '[ERROR] Network connection failed.');
+        }
+      });
+
+      initApp();
+    });
+  </script>
+</body>
+</html>
